@@ -1,0 +1,19 @@
+<!-- accounts/templates/home.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+</head>
+<body>
+    <h1>Welcome to the Instagram Log Project</h1>
+    <ul>
+        <li><a href="{% url 'create_instagram_account' %}">Create Instagram Account</a></li>
+        <li><a href="{% url 'log_message' %}">Log a Message</a></li>
+        <li><a href="{% url 'account_list' %}">View Instagram Accounts</a></li>
+        <li><a href="{% url 'log_list' %}">View Logs</a></li>
+        <li><a href="{% url 'start_task' %}">Start Celery Task</a></li>
+    </ul>
+</body>
+</html>
+

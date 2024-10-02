@@ -1,0 +1,13 @@
+<form method="POST">
+    {% csrf_token %}
+    <label for="account_id">Select Account:</label>
+    <select name="account_id">
+        {% for account in accounts %}
+        <option value="{{ account.id }}">{{ account.username }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="log_message">Log Message:</label>
+    <textarea name="log_message" required></textarea><br>
+    <button type="submit">Log Message</button>
+</form>
+

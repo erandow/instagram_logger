@@ -1,0 +1,16 @@
+<!-- accounts/templates/start_task.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Start Celery Task</title>
+</head>
+<body>
+    <h1>Start a Long-Running Task</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Start Task</button>
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,8 @@
+<h2>Logs</h2>
+<ul>
+    {% for log in logs %}
+    <li>{{ log.instagram_account.username }} - {{ log.log_message }} - {{ log.timestamp }}</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'log_message' %}">Add New Log</a>
+

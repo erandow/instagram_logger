@@ -1,32 +1,48 @@
-# Create your views here.
-
-# accounts/views.py
-
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from .models import InstagramAccount, Log
-from .forms import InstagramAccountForm
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .tasks import long_running_task
 
-@login_required
-def create_account(request):
+def create_instagram_account(request):
     if request.method == 'POST':
-        form = InstagramAccountForm(request.POST)
-        if form.is_valid():
-            account = form.save(commit=False)
-            account.user = request.user
-            account.save()
-            return redirect('account_list')
-    else:
-        form = InstagramAccountForm()
-    return render(request, 'accounts/create_account.html', {'form': form})
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        instagram_account = InstagramAccount(username=username, password=password)
+        instagram_account.save()
+        return redirect('account_list')
+    return render(request, 'create_instagram_account.html')
 
-@login_required
+
+def log_message(request):
+    if request.method == 'POST':
+        account_id = request.POST.get('account_id')
+        message = request.POST.get('log_message')
+        account = InstagramAccount.objects.get(id=account_id)
+        log = Log(instagram_account=account, log_message=message)
+        log.save()
+        return redirect('log_list')
+    accounts = InstagramAccount.objects.all()
+    return render(request, 'log_message.html', {'accounts': accounts})
+
+
 def account_list(request):
-    accounts = InstagramAccount.objects.filter(user=request.user)
-    return render(request, 'accounts/account_list.html', {'accounts': accounts})
+    accounts = InstagramAccount.objects.all()
+    return render(request, 'account_list.html', {'accounts': accounts})
 
-@login_required
-def view_logs(request):
+
+def log_list(request):
     logs = Log.objects.all()
-    return render(request, 'accounts/logs.html', {'logs': logs})
+    return render(request, 'log_list.html', {'logs': logs})
 
+def home(request):
+    return render(request, 'home.html')
+
+
+def start_task(request):
+    if request.method == 'POST':
+        # Trigger the Celery task
+        task = long_running_task.delay()
+        return JsonResponse({'task_id': task.id, 'status': 'Task started!'})
+
+    return render(request, 'start_task.html')

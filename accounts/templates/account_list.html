@@ -1,0 +1,17 @@
+<!-- accounts/templates/account_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account List</title>
+</head>
+<body>
+    <h2>Instagram Accounts</h2>
+    <ul>
+        {% for account in accounts %}
+            <li>{{ account.username }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_instagram_account' %}">Create New Account</a>
+</body>
+</html>
+
