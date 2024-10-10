@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ایجاد حساب بازیابی‌شده</title>
+</head>
+<body>
+    <h1>ایجاد حساب بازیابی‌شده</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="phone_number">شماره تلفن:</label>
+        <input type="text" id="phone_number" name="phone_number" required>
+        <br><br>
+        <button type="submit">ذخیره حساب</button>
+    </form>
+    <a href="{% url 'retrieved_account_list' %}">لیست حساب‌های بازیابی‌شده</a>  <!-- لینک به صفحه لیست -->
+</body>
+</html>
+

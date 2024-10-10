@@ -1,15 +1,32 @@
 import requests
 import json
+import configparser
+from ..models import RetrievedAccount
+
+
+
+# خواندن تنظیمات از فایل config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# بررسی اینکه آیا باید شماره تلفن‌ها از URL دریافت شوند یا از دیتابیس
+use_external_url = config.get('settings', 'use_external_url')
+phone_numbers_url = config.get('settings', 'phone_numbers_url')
+store_result_in_url = config.get('settings', 'store_result_in_url') 
 
 def get_last_32_contacts():
     try:
-        result = requests.get('https://api.saber24.ir/pending/mobile')
-        result.raise_for_status()  # Check for HTTP errors
-        my_dict = json.loads(result.text)
+        if use_external_url == 'true':
+            result = requests.get('https://api.saber24.ir/pending/mobile')
+            result.raise_for_status()  # Check for HTTP errors
+            my_dict = json.loads(result.text)
 
-        numbers = [element.get('mobile') for element in my_dict[-32:]]
-        if not numbers:
-            raise ValueError("No numbers found in the response")
+            numbers = [element.get('mobile') for element in my_dict[-32:]]
+            if not numbers:
+                raise ValueError("No numbers found in the response")
+        else:
+            numbers = RetrievedAccount.objects.order_by('-id').values_list('phone_number', flat=True)[:32]
+
 
         contacts = []
         for number in numbers:
@@ -54,3 +71,26 @@ def distribute_strings(strings):
     except Exception as e:
         print(f"Error distributing strings: {e}")
         return [[] for _ in range(5)]
+
+
+
+def update_username_by_core(phone_number, username):
+    try:
+        # جستجو برای یافتن حساب با استفاده از شماره تلفن
+        account = RetrievedAccount.objects.get(phone_number=phone_number)
+        # به‌روزرسانی نام کاربری
+        account.username = username
+        account.save()  # ذخیره تغییرات
+        return f"Username updated for account with phone number {phone_number}"
+
+    except RetrievedAccount.DoesNotExist:
+        # در صورت عدم وجود حساب با شماره تلفن وارد شده
+        return f"Account with phone number {phone_number} does not exist."
+
+
+def set_account(number, username):
+    if store_result_in_url == 'false':
+        update_username_by_core(number, username)
+    else:
+        # TODO:
+        pass

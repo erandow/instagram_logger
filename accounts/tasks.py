@@ -2,9 +2,9 @@
 
 from celery import shared_task
 import time
-from core.instagram import Instagram
+from .core.instagram import Instagram
 from .models import InstagramAccount
-from .functions import *
+from .core.functions import *
 
 @shared_task
 def long_running_task():

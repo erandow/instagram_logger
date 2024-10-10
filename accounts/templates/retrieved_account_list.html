@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>لیست حساب‌های بازیابی‌شده</title>
+</head>
+<body>
+    <h1>لیست حساب‌های بازیابی‌شده</h1>
+    <ul>
+        {% for account in accounts %}
+        <li>{{ account.username }} - {{ account.phone_number }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_retrieved_account' %}">ایجاد حساب بازیابی‌شده جدید</a>
+</body>
+</html>
+

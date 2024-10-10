@@ -16,3 +16,13 @@ class Log(models.Model):
     def __str__(self):
         return f"Log at {self.timestamp}: {self.log_message[:50]}..."
 
+
+from django.db import models
+
+class RetrievedAccount(models.Model):
+    phone_number = models.CharField(max_length=15)  # شماره تلفن
+    username = models.CharField(max_length=150)  # نام کاربری
+
+    def __str__(self):
+        return f"{self.username} - {self.phone_number}"  # نمایش نام کاربری و شماره تلفن به عنوان رشته
+

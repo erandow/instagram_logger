@@ -10,6 +10,7 @@ urlpatterns = [
     path('accounts/', views.account_list, name='account_list'),
     path('logs/', views.log_list, name='log_list'),
     path('start_task/', views.start_task, name='start_task'),  # URL to start the Celery task
-
+    path('create_retrieved_account/', views.create_retrieved_account, name='create_retrieved_account'),
+    path('retrieved_account_list/', views.retrieved_account_list, name='retrieved_account_list'),
 ]
 

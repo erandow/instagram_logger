@@ -3,6 +3,7 @@ from .models import InstagramAccount, Log
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .tasks import long_running_task
+from .models import RetrievedAccount
 
 def create_instagram_account(request):
     if request.method == 'POST':
@@ -46,3 +47,36 @@ def start_task(request):
         return JsonResponse({'task_id': task.id, 'status': 'Task started!'})
 
     return render(request, 'start_task.html')
+
+from .models import RetrievedAccount
+
+def create_retrieved_account(request):
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number')
+        RetrievedAccount.objects.create(phone_number=phone_number)
+        return redirect('retrieved_account_list')  # هدایت به لیست حساب‌های ذخیره شده
+    return render(request, 'create_retrieved_account.html')
+
+def retrieved_account_list(request):
+    accounts = RetrievedAccount.objects.all()  # دریافت تمام حساب‌های بازیابی‌شده
+    return render(request, 'retrieved_account_list.html', {'accounts': accounts})
+
+
+def update_username(request):
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number')
+        username = request.POST.get('username')
+
+        try:
+            # پیدا کردن حساب بر اساس شماره تلفن
+            account = RetrievedAccount.objects.get(phone_number=phone_number)
+            # به‌روزرسانی نام کاربری
+            account.username = username
+            account.save()  # ذخیره تغییرات
+
+            return redirect('retrieved_account_list')  # هدایت به لیست حساب‌ها پس از به‌روزرسانی
+        except RetrievedAccount.DoesNotExist:
+            return render(request, 'update_username.html', {'error': 'شماره تلفن یافت نشد.'})
+
+    return render(request, 'update_username.html')
+
