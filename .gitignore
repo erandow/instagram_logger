@@ -1,1 +1,8 @@
 *__pycache__*
+*//*__pycache__*
+*.pyc
+*accounts//__pycache__*
+*accounts//__pycache__/*
+*instagram_log_project//__pycache__*
+*instagram_log_project//__pycache__/*
+*.cpython-312.pyc
