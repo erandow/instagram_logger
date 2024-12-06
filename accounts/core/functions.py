@@ -2,6 +2,7 @@ import requests
 import json
 import configparser
 from ..models import RetrievedAccount
+import re
 
 
 
@@ -13,6 +14,7 @@ config.read('config.ini')
 use_external_url = config.get('settings', 'use_external_url')
 phone_numbers_url = config.get('settings', 'phone_numbers_url')
 store_result_in_url = config.get('settings', 'store_result_in_url') 
+owner_id = config.get('settings', 'owner_id')
 
 def get_last_32_contacts():
     try:
@@ -92,5 +94,20 @@ def set_account(number, username):
     if store_result_in_url == 'false':
         update_username_by_core(number, username)
     else:
-        # TODO:
+        post = {
+            "username": username['username'],
+            "user_id": username['pk_id'],
+            "mobile": number,
+            "name": username['full_name'],
+            "profile_image": username['profile_pic_url'].split('?')[0],
+            "follower_count": re.search('"edge_followed_by":{"count":([0-9]+)}',requests.get("https://www.instagram.com/" + username['username']).text).group(1),
+            "following_count": re.search('"edge_follow":{"count":([0-9]+)}',requests.get("https://www.instagram.com/" + username['username']).text).group(1),
+            "owner_id": owner_id,
+        }
+        result = requests.post(store_result_in_url, data=post)
         pass
+
+
+def get_specific_string_from_indices(dist_numbers, indices):
+    index = sum([int(2**k * x) for x, k in zip(indices, range(1, len(indices) + 1))])
+    return dist_numbers[index]
