@@ -102,6 +102,9 @@ class Instagram:
             print(f"Error generating signature: {e}")
             return None
 
+    def retriveFromAdressBook(self, target_id = 0):
+        return self.sendRequest(f'discover/chaining/?target_id={target_id}')
+
     def sendRequest(self, endpoint, post=None, login=False):
         try:
             if not self.isLoggedIn and not login:

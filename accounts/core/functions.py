@@ -15,6 +15,19 @@ use_external_url = config.get('settings', 'use_external_url')
 phone_numbers_url = config.get('settings', 'phone_numbers_url')
 store_result_in_url = config.get('settings', 'store_result_in_url') 
 owner_id = config.get('settings', 'owner_id')
+result_no_account_url = config.get('settings', 'result_no_account_url')
+
+def check_no_account(number):
+    return False
+
+def set_number_no_account(number):
+    post = {
+        "mobile": number,
+        "status": 2,
+        "owner_id": owner_id,
+    }
+    result = requests.post(result_no_account_url, data=post)
+    print(result)
 
 def get_last_32_contacts():
     try:
@@ -105,6 +118,7 @@ def set_account(number, username):
             "owner_id": owner_id,
         }
         result = requests.post(store_result_in_url, data=post)
+        print(result)
         pass
 
 
