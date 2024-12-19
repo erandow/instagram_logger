@@ -5,12 +5,14 @@ import time
 from .core.instagram import Instagram
 from .models import InstagramAccount
 from .core.functions import *
+from datetime import datetime
 
 @shared_task
 def long_running_task():
 
     loggedin_accounts = []
-    accounts = InstagramAccount.objects.all()
+    accounts = InstagramAccount.objects.all().order_by('lru').values()
+    accounts = accounts[:5]
     pks = []
     for account in accounts:
         print(f"Username: {account.username}, Password: {account.password}")
@@ -43,7 +45,7 @@ def long_running_task():
             print("Countdown completed. Executing the main task 1 more time...")
 
 
-
+    print("Unlink done")
     repeat_read_numbers = True
     while repeat_read_numbers:
         numbers, tmp = get_last_32_contacts()
@@ -53,16 +55,21 @@ def long_running_task():
                 print(f"Found number with no instagram account {numbers[i]}")
                 del numbers[i]
                 repeat_read_numbers = True
+                set_number_no_account((numbers[i]))
 
     print("Querying at most 32 pending numbers.... please wait. this might take several hours.")
     print(numbers)
     dist_numbers = distribute_strings(numbers)
     print("Distributed numbers:")
     print(dist_numbers)
-    for i in range(5):
-        res = loggedin_accounts[i].syncFromAdressBook(dist_numbers[i])
-        if not res:
-            print("Failed to get contacts [" + json.loads( loggedin_accounts[i].lastResponse.text)["message"] + "]")
+    repeat_sync_contact = False
+    while not repeat_sync_contact:
+        repeat_sync_contact = True
+        for i in range(5):
+            res = loggedin_accounts[i].syncFromAdressBook(dist_numbers[i])
+            if not res:
+                repeat_sync_contact = False
+                print("Failed to get contacts [" + json.loads( loggedin_accounts[i].lastResponse.text)["message"] + "]")
 
 
     time.sleep(300) # sleep 5 minutes before getting the result
@@ -79,6 +86,7 @@ def long_running_task():
                 time.sleep(300)
                 break
 
+    accounts.bulk_update(lru=datetime.now())
 
     # Decode based on results
     info_dict = {}
