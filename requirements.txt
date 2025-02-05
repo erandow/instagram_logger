@@ -7,3 +7,4 @@ PySocks==1.7.1         # If you're facing SOCKS support issues
 schedule==1.1.0        # For job scheduling
 requests==2.31.0       # For making HTTP requests
 psycopg2-binary==2.9.7  # Add this line
+django-celery-beat

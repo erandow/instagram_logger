@@ -122,3 +122,8 @@ def long_running_task():
 # 13    1101 => account 4, account 3, account 1
 # 14    1110 => account 4, account 3, account 2
 # 15    1111 =? account 4, account 3, account 2, account 1
+
+
+@shared_task
+def my_scheduled_task():
+    long_running_task().delay()
