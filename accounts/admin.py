@@ -18,6 +18,3 @@ admin.site.register(Log)
 
 
 admin.site.register(ConfigSetting)
-admin.site.register(PeriodicTask)
-admin.site.register(IntervalSchedule)
-
