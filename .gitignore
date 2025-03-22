@@ -6,3 +6,14 @@
 *instagram_log_project//__pycache__*
 *instagram_log_project//__pycache__/*
 *.cpython-312.pyc
+new_venv/
+
+# Database files
+db.sqlite3
+*.sqlite3
+
+# Celery beat schedule files
+celerybeat-schedule
+celerybeat-schedule.dat
+celerybeat-schedule.dir
+celerybeat-schedule.bak

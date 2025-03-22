@@ -12,11 +12,11 @@ def long_running_task():
 
     loggedin_accounts = []
     accounts = InstagramAccount.objects.all().order_by('lru').values()
-    accounts = accounts[:5]
+    accounts_list = list(accounts[:5])  # Convert QuerySet to list for later use
     pks = []
-    for account in accounts:
-        print(f"Username: {account.username}, Password: {account.password}")
-        loggedin_accounts.append(Instagram(account.username, account.password))
+    for account in accounts_list:
+        print(f"Username: {account['username']}, Password: {account['password']}")
+        loggedin_accounts.append(Instagram(account['username'], account['password']))
         res = loggedin_accounts[-1].login()
         if not res:
             print(f"cant login account. please double check accounts and the retry")
@@ -73,20 +73,24 @@ def long_running_task():
 
 
     time.sleep(300) # sleep 5 minutes before getting the result
-    results = []
+    results = []  # Initialize results list
     repeat_read_numbers = False
     while not repeat_read_numbers:
         repeat_read_numbers = True
         for i in range(5):
             if loggedin_accounts[i].retriveFromAdressBook(pks[i]):
-                result.append(loggedin_accounts[i].get_last_json())
+                results.append(loggedin_accounts[i].get_last_json())  # Use results instead of result
             else:
                 repeat_read_numbers = False
                 print('Failed to get result from 1 account. retrying in 5 minutes...')
                 time.sleep(300)
                 break
 
-    accounts.bulk_update(lru=datetime.now())
+    # Update the lru field for each account
+    for account in accounts_list:
+        account_obj = InstagramAccount.objects.get(id=account['id'])
+        account_obj.lru = datetime.now()
+        account_obj.save()
 
     # Decode based on results
     info_dict = {}
@@ -127,3 +131,6 @@ def long_running_task():
 @shared_task
 def my_scheduled_task():
     long_running_task().delay()
+    
+if __name__ == "__main__":
+    my_scheduled_task()

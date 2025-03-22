@@ -1,5 +1,5 @@
-Django==4.2.5          # The Django version you're using
-celery==5.3.4          # Celery for task queue
+Django==3.2.25          # The Django version compatible with Python 3.7
+celery==5.2.7          # Celery version compatible with Python 3.7
 redis==4.5.1           # Redis for the broker and backend
 django-celery-beat==2.5.0  # Optional, for scheduling periodic tasks
 django-celery-results==2.5.1  # Optional, for storing task results in Django
@@ -7,4 +7,3 @@ PySocks==1.7.1         # If you're facing SOCKS support issues
 schedule==1.1.0        # For job scheduling
 requests==2.31.0       # For making HTTP requests
 psycopg2-binary==2.9.7  # Add this line
-django-celery-beat

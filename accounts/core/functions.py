@@ -32,15 +32,18 @@ def set_number_no_account(number):
 def get_last_32_contacts():
     try:
         if use_external_url == 'true':
-            result = requests.get('https://api.saber24.ir/pending/mobile')
+            result = requests.get(phone_numbers_url)
             result.raise_for_status()  # Check for HTTP errors
             my_dict = json.loads(result.text)
 
             numbers = [element.get('mobile') for element in my_dict[-32:]]
             if not numbers:
                 raise ValueError("No numbers found in the response")
+            
+            contacts_count = len(my_dict)
         else:
             numbers = RetrievedAccount.objects.order_by('-id').values_list('phone_number', flat=True)[:32]
+            contacts_count = len(numbers)
 
 
         contacts = []
@@ -54,7 +57,7 @@ def get_last_32_contacts():
             contact["email_addresses"] = []
             contacts.append(contact)
 
-        return contacts, len(my_dict)
+        return contacts, contacts_count
 
     except requests.exceptions.RequestException as e:
         print(f"Network error: {e}")
@@ -104,24 +107,63 @@ def update_username_by_core(phone_number, username):
 
 
 def set_account(number, username):
-    if store_result_in_url == 'false':
-        update_username_by_core(number, username)
-    else:
-        post = {
-            "username": username['username'],
-            "user_id": username['pk_id'],
-            "mobile": number,
-            "name": username['full_name'],
-            "profile_image": username['profile_pic_url'].split('?')[0],
-            "follower_count": re.search('"edge_followed_by":{"count":([0-9]+)}',requests.get("https://www.instagram.com/" + username['username']).text).group(1),
-            "following_count": re.search('"edge_follow":{"count":([0-9]+)}',requests.get("https://www.instagram.com/" + username['username']).text).group(1),
-            "owner_id": owner_id,
-        }
-        result = requests.post(store_result_in_url, data=post)
-        print(result)
-        pass
+    try:
+        if not number or not username:
+            print(f"Warning: Missing data - number: {number}, username: {username}")
+            return
+            
+        if store_result_in_url == 'false':
+            update_username_by_core(number, username)
+        else:
+            # Prepare the post data with error handling for missing fields
+            post = {
+                "username": username.get('username', ''),
+                "user_id": username.get('pk_id', ''),
+                "mobile": number,
+                "name": username.get('full_name', ''),
+                "owner_id": owner_id,
+            }
+            
+            # Add profile image if available
+            if 'profile_pic_url' in username:
+                profile_pic = username['profile_pic_url'].split('?')[0]
+                post["profile_image"] = profile_pic
+            
+            # Try to get follower and following counts
+            try:
+                profile_response = requests.get(f"https://www.instagram.com/{username.get('username', '')}")
+                profile_text = profile_response.text
+                
+                follower_match = re.search('"edge_followed_by":{"count":([0-9]+)}', profile_text)
+                if follower_match:
+                    post["follower_count"] = follower_match.group(1)
+                
+                following_match = re.search('"edge_follow":{"count":([0-9]+)}', profile_text)
+                if following_match:
+                    post["following_count"] = following_match.group(1)
+            except Exception as e:
+                print(f"Error getting follower/following counts: {e}")
+            
+            # Send the data
+            result = requests.post(store_result_in_url, data=post)
+            print(f"API response: {result.status_code} - {result.text}")
+    except Exception as e:
+        print(f"Error in set_account: {e}")
 
 
 def get_specific_string_from_indices(dist_numbers, indices):
-    index = sum([int(2**k * x) for x, k in zip(indices, range(1, len(indices) + 1))])
-    return dist_numbers[index]
+    try:
+        # Calculate the index based on the binary representation
+        index = 0
+        for i, idx in enumerate(indices):
+            index += 2**i * (1 if idx in [0, 1, 2, 3, 4] else 0)
+        
+        # Ensure the index is within the valid range
+        if index < 0 or index >= len(dist_numbers):
+            print(f"Warning: Calculated index {index} is out of range for dist_numbers of length {len(dist_numbers)}")
+            return None
+        
+        return dist_numbers[index]
+    except Exception as e:
+        print(f"Error in get_specific_string_from_indices: {e}")
+        return None
